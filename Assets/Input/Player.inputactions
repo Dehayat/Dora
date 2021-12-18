@@ -22,6 +22,38 @@
                     "interactions": "Press"
                 },
                 {
+                    "name": "AimJar",
+                    "type": "Button",
+                    "id": "23ae26ff-f222-4765-ade6-28d1b7f87766",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "Press"
+                },
+                {
+                    "name": "ThrowJar",
+                    "type": "Button",
+                    "id": "b4973d0a-2626-49ad-a435-3c3bae5bcca7",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "Press(behavior=1)"
+                },
+                {
+                    "name": "Aim Jar2",
+                    "type": "Button",
+                    "id": "e9b13f74-d588-4cd5-a789-74c89beaa19c",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "Press"
+                },
+                {
+                    "name": "ThrowJar2",
+                    "type": "Button",
+                    "id": "e25dfa28-4a87-4040-b2eb-c781e08f1f83",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "Press(behavior=1)"
+                },
+                {
                     "name": "Aim",
                     "type": "Value",
                     "id": "98564085-7f7c-4f7a-9c51-fdfd652d81ef",
@@ -30,7 +62,7 @@
                     "interactions": ""
                 },
                 {
-                    "name": "Attack",
+                    "name": "Teleport",
                     "type": "Button",
                     "id": "089d483c-f12e-4d12-a983-ad70fa56a273",
                     "expectedControlType": "Button",
@@ -49,28 +81,6 @@
             "bindings": [
                 {
                     "name": "",
-                    "id": "978bfe49-cc26-4a3d-ab7b-7d7a29327403",
-                    "path": "<Gamepad>/leftStick/x",
-                    "interactions": "",
-                    "processors": "AxisDeadzone(min=0.2,max=0.8)",
-                    "groups": ";Gamepad",
-                    "action": "Move",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "8a30f536-b535-426b-a352-bef34438b8ee",
-                    "path": "<Gamepad>/buttonSouth",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Gamepad",
-                    "action": "Jump",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "6c5beaab-8355-4d39-b4fb-ac4030013793",
                     "path": "<Keyboard>/space",
                     "interactions": "",
@@ -82,11 +92,11 @@
                 },
                 {
                     "name": "",
-                    "id": "23869329-c9af-4d68-b6b7-6edf96ac8478",
-                    "path": "<Gamepad>/leftStick",
+                    "id": "15c765e5-346b-4bc5-ae3a-7d5df8840feb",
+                    "path": "<Mouse>/position",
                     "interactions": "",
-                    "processors": "AxisDeadzone",
-                    "groups": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
                     "action": "Aim",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -94,11 +104,11 @@
                 {
                     "name": "",
                     "id": "daa81a59-bea1-4820-852f-dc8427ee2c5d",
-                    "path": "<Gamepad>/buttonWest",
+                    "path": "<Keyboard>/space",
                     "interactions": "",
                     "processors": "",
-                    "groups": "",
-                    "action": "Attack",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Teleport",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -167,6 +177,50 @@
                     "action": "Move",
                     "isComposite": false,
                     "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "10e7e7b6-88bb-422b-82ef-478f063ac03f",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "Press",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "AimJar",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "01359d78-e9d2-4a59-9ab0-9922f974fee8",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "Press(behavior=1)",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "ThrowJar",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3998cd00-2685-4ecd-830d-8a70413641ed",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "Press(behavior=1)",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "ThrowJar2",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "fdc1c392-a55e-4fb5-93df-67757dd44c4e",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "Press",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "Aim Jar2",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         }

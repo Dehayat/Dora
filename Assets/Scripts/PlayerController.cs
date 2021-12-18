@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -11,7 +12,6 @@ public class PlayerController : MonoBehaviour
         Idle,
         Running,
         Falling,
-        Jumping,
     }
 
     //Movement
@@ -19,18 +19,42 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private float runSpeed;
     [SerializeField]
-    private float jumpSpeed;
-    [SerializeField]
-    private float jumpSteps;
-    [SerializeField]
-    private float jumpCoolDown;
-    [SerializeField]
-    private int jumpHelpFrames;
-    [SerializeField]
-    private float jumpStepsMin;
-    [SerializeField]
     private LayerMask groundLayer;
+    //jar
+    [Header("Throwing Jar")]
+    [SerializeField]
+    private float throwJarCooldown = 0.4f;
+    [SerializeField]
+    private GameObject throwJarPrefab;
+    [SerializeField]
+    private Transform throwJarPoint;
+    [SerializeField]
+    private float throwJarForce = 10f;
+    [SerializeField, Range(0f, 1f)]
+    private float throwJarDownDeadZone = 0.2f;
+    [Header("Throwing Teleport Jar")]
+    [SerializeField]
+    private float teleportJarCooldown = 0.2f;
+    [SerializeField]
+    private GameObject telportJarPrefab;
+    [SerializeField, Range(0f, 1f)]
+    private float teleportJarDownDeadZone = 0.2f;
+    [SerializeField]
+    private float teleportJarCooldownAfterTeleport = 0.2f;
 
+
+    private float _moveInput;
+    private float moveInput
+    {
+        get
+        {
+            return _moveInput;
+        }
+        set
+        {
+            _moveInput = value;
+        }
+    }
     public void MoveInput(CallbackContext callbackContext)
     {
         if (!listenForInput)
@@ -52,30 +76,87 @@ public class PlayerController : MonoBehaviour
             _moveInput = 0;
         }
     }
-
-    public void JumpInput(CallbackContext callbackContext)
+    private Vector2 aimInput;
+    private Vector3 aimDirection;
+    public void AimInput(CallbackContext callbackContext)
     {
         if (!listenForInput)
         {
-            wantToJump = false;
+            aimInput = Vector2.right * facingDir;
+            return;
+        }
+        aimInput = callbackContext.ReadValue<Vector2>();
+        Vector3 aimPosition = Camera.main.ScreenToWorldPoint(new Vector3(aimInput.x, aimInput.y, 0));
+        aimPosition.z = 0;
+        aimDirection = aimPosition - throwJarPoint.position;
+        aimDirection.Normalize();
+    }
+    private bool isAiming = false;
+    public void AimJarInput(CallbackContext callbackContext)
+    {
+        if (!listenForInput)
+        {
+            return;
+        }
+        if ((canThrow) && callbackContext.performed)
+        {
+            isAiming = true;
+            anim.SetBool("Aiming", true);
+        }
+    }
+    public void AimJar2Input(CallbackContext callbackContext)
+    {
+        if (!listenForInput)
+        {
+            return;
+        }
+        if ((canThrowTeleport) && callbackContext.performed)
+        {
+            isAiming = true;
+            anim.SetBool("Aiming", true);
+        }
+    }
+
+    private bool _wantToThrow;
+    public void ThrowInput(CallbackContext callbackContext)
+    {
+        if (!listenForInput)
+        {
+            _wantToThrow = false;
             return;
         }
         if (callbackContext.performed)
         {
-            wantToJump = true;
-            jumpHelpFramesLeft = jumpHelpFrames;
+            _wantToThrow = true;
         }
     }
-    //public void AimInput(CallbackContext callbackContext)
-    //{
-    //    if (!listenForInput)
-    //    {
-    //        aimInput = Vector2.right * facingDir;
-    //        return;
-    //    }
-    //    aimInput = callbackContext.ReadValue<Vector2>();
-    //    aimInput.Normalize();
-    //}
+    private bool _wantToThrowTeleport;
+    public void ThrowTeleportInput(CallbackContext callbackContext)
+    {
+        if (!listenForInput)
+        {
+            _wantToThrowTeleport = false;
+            return;
+        }
+        if (callbackContext.performed)
+        {
+            _wantToThrowTeleport = true;
+        }
+    }
+    bool _wantToTeleport = false;
+    public void TeleportInput(CallbackContext callbackContext)
+    {
+        if (!listenForInput)
+        {
+            _wantToTeleport = false;
+            return;
+        }
+        if (callbackContext.performed)
+        {
+            _wantToTeleport = true;
+        }
+    }
+
     public void ResetDirection()
     {
         FaceRight();
@@ -85,42 +166,25 @@ public class PlayerController : MonoBehaviour
         listenForInput = canControl;
     }
 
-
-    private static PlayerController instance;
-
     private Rigidbody2D rb;
     private new Transform transform;
     private Animator anim;
+    private SpriteRenderer sprite;
     private bool listenForInput;
-    private float _moveInput;
-    private float moveInput
-    {
-        get
-        {
-            return _moveInput;
-        }
-        set
-        {
-            _moveInput = value;
-        }
-    }
     private bool isGrounded;
     private PlayerMoveState moveState;
-    private bool wantToJump;
-    private int currentJumpSteps;
-    private float jumpCoolDownTimer;
     private int facingDir;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponentInChildren<Animator>();
+        sprite = GetComponentInChildren<SpriteRenderer>();
         transform = base.transform;
         rb.velocity = Vector2.zero;
         listenForInput = true;
         isGrounded = false;
         moveState = PlayerMoveState.Idle;
-        jumpCoolDownTimer = 0;
         FaceRight();
     }
 
@@ -143,21 +207,92 @@ public class PlayerController : MonoBehaviour
                 case PlayerMoveState.Falling:
                     FallingState();
                     break;
-                case PlayerMoveState.Jumping:
-                    JumpingState();
-                    break;
                 default:
                     break;
             }
         }
+        TryThrow();
+        TryTeleport();
+        TryThrowTeleport();
         ResetInput();
-        UpdateTimers();
+    }
+
+    private bool canThrow = true;
+    private async void TryThrow()
+    {
+        if (_wantToThrow && canThrow)
+        {
+            if (Mathf.Abs(aimDirection.x) < throwJarDownDeadZone && aimDirection.y < 0)
+            {
+                return;
+            }
+
+            anim.SetTrigger("Throw");
+            anim.SetBool("Aiming", false);
+            isAiming = false;
+            GameObject jar = Instantiate(throwJarPrefab, throwJarPoint.position, Quaternion.identity);
+            Rigidbody2D jarRb = jar.GetComponent<Rigidbody2D>();
+            jarRb.AddForce(aimDirection * throwJarForce, ForceMode2D.Impulse);
+
+            float nextThrow = Time.time + throwJarCooldown;
+            canThrow = false;
+            while (Time.time <= nextThrow)
+            {
+                await Task.Yield();
+            }
+            canThrow = true;
+        }
+    }
+    private bool canThrowTeleport = true;
+    private bool hasTeleportJar = true;
+    private GameObject teleportJar = null;
+    private async void TryThrowTeleport()
+    {
+        if (_wantToThrowTeleport && canThrowTeleport && hasTeleportJar)
+        {
+            if (Mathf.Abs(aimDirection.x) < teleportJarDownDeadZone && aimDirection.y < 0)
+            {
+                return;
+            }
+
+            anim.SetTrigger("Throw");
+            anim.SetBool("Aiming", false);
+            isAiming = false;
+            teleportJar = Instantiate(telportJarPrefab, throwJarPoint.position, Quaternion.identity);
+            hasTeleportJar = false;
+            Rigidbody2D jarRb = teleportJar.GetComponent<Rigidbody2D>();
+            jarRb.AddForce(aimDirection * throwJarForce, ForceMode2D.Impulse);
+
+            float nextThrow = Time.time + teleportJarCooldown;
+            canThrowTeleport = false;
+            while (Time.time <= nextThrow)
+            {
+                canThrowTeleport = false;
+                await Task.Yield();
+            }
+        }
+    }
+    private async void TryTeleport()
+    {
+        if (_wantToTeleport && !hasTeleportJar)
+        {
+            hasTeleportJar = true;
+            transform.position = teleportJar.transform.position;
+            rb.velocity = Vector2.zero;
+            DestroyImmediate(teleportJar);
+            float nextThrow = Time.time + teleportJarCooldownAfterTeleport;
+            while (Time.time <= nextThrow)
+            {
+                canThrowTeleport = false;
+                await Task.Yield();
+            }
+            canThrowTeleport = true;
+        }
     }
 
     private void Die()
     {
         isDead = true;
-        StopJumping();
         SetControl(false);
         anim.SetBool("Hit", false);
         anim.SetTrigger("Die");
@@ -170,22 +305,15 @@ public class PlayerController : MonoBehaviour
 
     private void ResetInput()
     {
-
-        if (wantToJump && jumpHelpFramesLeft == 0)
-            wantToJump = false;
+        _wantToThrow = false;
+        _wantToThrowTeleport = false;
+        _wantToTeleport = false;
     }
-    private void UpdateTimers()
-    {
-        if (jumpCoolDownTimer > 0)
-            jumpCoolDownTimer -= Time.fixedDeltaTime;
-        if (jumpHelpFramesLeft > 0)
-            jumpHelpFramesLeft--;
-    }
-
 
     private void IdleState()
     {
-        if (CheckFalling() || TryJump()) return;
+        CheckLookDir();
+        if (CheckFalling()) return;
         Vector2 vel = rb.velocity;
         vel.x = moveInput * runSpeed;
         if (vel.x > 0.001f || vel.x < -0.001f)
@@ -204,38 +332,21 @@ public class PlayerController : MonoBehaviour
         }
         return false;
     }
-    private bool TryJump()
-    {
-        if (wantToJump && jumpCoolDownTimer <= 0)
-        {
-            StartJumping();
-            return true;
-        }
-        return false;
-    }
-
-
-    private void StartJumping()
-    {
-        currentJumpSteps = 0;
-        moveState = PlayerMoveState.Jumping;
-        //anim.SetBool("Jumping", true);
-    }
 
     private void StartFalling()
     {
         moveState = PlayerMoveState.Falling;
-        //anim.SetBool("Falling", true);
+        anim.SetBool("Falling", true);
     }
     private void StartRunning()
     {
         moveState = PlayerMoveState.Running;
-        //anim.SetBool("Running", true);
+        anim.SetBool("Running", true);
     }
 
     private void RunningState()
     {
-        if (CheckFalling() || TryJump())
+        if (CheckFalling())
         {
             StopRunning();
         }
@@ -254,6 +365,19 @@ public class PlayerController : MonoBehaviour
 
     private void CheckLookDir()
     {
+        if (isAiming)
+        {
+            if (aimDirection.x > 0)
+            {
+                FaceRight();
+            }
+            else
+            {
+                FaceLeft();
+            }
+            return;
+        }
+
         if (moveInput > 0.01f)
         {
             FaceRight();
@@ -266,7 +390,7 @@ public class PlayerController : MonoBehaviour
 
     private void StopRunning()
     {
-        //anim.SetBool("Running", false);
+        anim.SetBool("Running", false);
     }
 
     private void FallingState()
@@ -285,38 +409,11 @@ public class PlayerController : MonoBehaviour
 
     private void StopFalling()
     {
-        //anim.SetBool("Falling", false);
+        anim.SetBool("Falling", false);
     }
-
-    private void JumpingState()
-    {
-        rb.gravityScale = 2;
-        CheckLookDir();
-        if (currentJumpSteps < jumpSteps)
-        {
-
-            Vector2 velocity = rb.velocity;
-            velocity.y = jumpSpeed;
-            rb.velocity = velocity;
-        }
-        else
-        {
-            StopJumping();
-            StartFalling();
-        }
-        currentJumpSteps++;
-    }
-
-    private void StopJumping()
-    {
-        jumpCoolDownTimer = jumpCoolDown;
-        //anim.SetBool("Jumping", false);
-    }
-
 
     private ContactPoint2D[] groundedContactResult = new ContactPoint2D[1];
     private RaycastHit2D[] raycastHit2Ds = new RaycastHit2D[1];
-    private int jumpHelpFramesLeft;
 
     private void CheckGrounded()
     {
@@ -343,9 +440,11 @@ public class PlayerController : MonoBehaviour
     private void FaceLeft()
     {
         facingDir = -1;
+        sprite.flipX = true;
     }
     private void FaceRight()
     {
         facingDir = 1;
+        sprite.flipX = false;
     }
 }

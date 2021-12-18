@@ -217,6 +217,7 @@ GameObject:
   - component: {fileID: 61906644}
   - component: {fileID: 61906643}
   - component: {fileID: 61906645}
+  - component: {fileID: 61906646}
   m_Layer: 0
   m_Name: Pandora
   m_TagString: Untagged
@@ -237,6 +238,7 @@ Transform:
   m_Children:
   - {fileID: 1454644937}
   - {fileID: 904139585}
+  - {fileID: 1877565870}
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -253,14 +255,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   runSpeed: 5
-  jumpSpeed: 5
-  jumpSteps: 1
-  jumpCoolDown: 0.1
-  jumpHelpFrames: 5
-  jumpStepsMin: 2
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
+  throwJarCooldown: 0.5
+  throwJarPrefab: {fileID: 5557334097047289392, guid: 31174da54c5cdda4a80b3591506166b6, type: 3}
+  throwJarPoint: {fileID: 1877565870}
+  throwJarForce: 10
+  throwJarDownDeadZone: 0.7
+  teleportJarCooldown: 0.3
+  telportJarPrefab: {fileID: 5557334097047289392, guid: 3ae6675b5ec73794ea998f019670c5ca, type: 3}
+  teleportJarDownDeadZone: 0.7
+  teleportJarCooldownAfterTeleport: 0.2
 --- !u!50 &61906644
 Rigidbody2D:
   serializedVersion: 4
@@ -324,10 +330,14 @@ MonoBehaviour:
     m_ActionId: cac8e2fd-f45a-41f5-8088-9de2eb1f9962
     m_ActionName: Player/Move[/Keyboard/a,/Keyboard/leftArrow,/Keyboard/rightArrow,/Keyboard/d]
   - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 505110f6-e65a-4e8f-8814-3ff5b0e579ac
+    m_ActionName: Player/Jump
+  - m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 61906643}
         m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
-        m_MethodName: JumpInput
+        m_MethodName: AimInput
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -337,25 +347,116 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-    m_ActionId: 505110f6-e65a-4e8f-8814-3ff5b0e579ac
-    m_ActionName: Player/Jump
-  - m_PersistentCalls:
-      m_Calls: []
     m_ActionId: 98564085-7f7c-4f7a-9c51-fdfd652d81ef
     m_ActionName: Player/Aim
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 61906643}
+        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
+        m_MethodName: TeleportInput
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: 089d483c-f12e-4d12-a983-ad70fa56a273
     m_ActionName: Player/Attack
   - m_PersistentCalls:
       m_Calls: []
     m_ActionId: c5508a90-f000-4678-b847-33b41e372924
     m_ActionName: Player/PickUp
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 61906643}
+        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
+        m_MethodName: AimJarInput
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 23ae26ff-f222-4765-ade6-28d1b7f87766
+    m_ActionName: Player/ThrowJar[/Mouse/leftButton]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 61906643}
+        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
+        m_MethodName: ThrowInput
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: b4973d0a-2626-49ad-a435-3c3bae5bcca7
+    m_ActionName: Player/ThrowJar[/Mouse/leftButton]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 61906643}
+        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
+        m_MethodName: ThrowTeleportInput
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: e25dfa28-4a87-4040-b2eb-c781e08f1f83
+    m_ActionName: Player/ThrowJar2[/Mouse/rightButton]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 61906643}
+        m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
+        m_MethodName: AimJar2Input
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: e9b13f74-d588-4cd5-a789-74c89beaa19c
+    m_ActionName: Player/Aim Jar2[/Mouse/rightButton]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
+--- !u!95 &61906646
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 61906641}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: a7640c7b500ed324d99e1d21a3684c8d, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &62180847
 GameObject:
   m_ObjectHideFlags: 0
@@ -652,7 +753,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1454644936}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalPosition: {x: 0.03, y: 1.2, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 61906642}
@@ -698,7 +799,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -9095717837082945937, guid: bd3cb4af8406d4436a2ae8c2aafe1f8d, type: 3}
+  m_Sprite: {fileID: 4625688976007506212, guid: cc4ab60c4fd412d49a042c66178955b4, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -709,3 +810,94 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &1877565869
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1877565870}
+  m_Layer: 0
+  m_Name: JarThrowPosition
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1877565870
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1877565869}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 2.343, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 61906642}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &5557334095879590149
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 5557334097047289392, guid: 31174da54c5cdda4a80b3591506166b6, type: 3}
+      propertyPath: m_Name
+      value: Jar
+      objectReference: {fileID: 0}
+    - target: {fileID: 5557334097047289392, guid: 31174da54c5cdda4a80b3591506166b6, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5557334097047289395, guid: 31174da54c5cdda4a80b3591506166b6, type: 3}
+      propertyPath: m_RootOrder
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 5557334097047289395, guid: 31174da54c5cdda4a80b3591506166b6, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5557334097047289395, guid: 31174da54c5cdda4a80b3591506166b6, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5557334097047289395, guid: 31174da54c5cdda4a80b3591506166b6, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5557334097047289395, guid: 31174da54c5cdda4a80b3591506166b6, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5557334097047289395, guid: 31174da54c5cdda4a80b3591506166b6, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5557334097047289395, guid: 31174da54c5cdda4a80b3591506166b6, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5557334097047289395, guid: 31174da54c5cdda4a80b3591506166b6, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5557334097047289395, guid: 31174da54c5cdda4a80b3591506166b6, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5557334097047289395, guid: 31174da54c5cdda4a80b3591506166b6, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5557334097047289395, guid: 31174da54c5cdda4a80b3591506166b6, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 31174da54c5cdda4a80b3591506166b6, type: 3}
