@@ -268,6 +268,7 @@ public class PlayerController : MonoBehaviour
         {
             health = 0;
         }
+        UIContainer.instance.SetHealth(health);
         anim.SetTrigger("Damage");
         allowActions = false;
         float canMoveTimer = Time.time + takeDamageCooldown;

@@ -16,6 +16,8 @@ public class UIContainer : MonoBehaviour
     private GameObject textContainer;
     [SerializeField]
     private Text textField;
+    [SerializeField]
+    private Text healthTextField;
 
     public void ShowText(string text)
     {
@@ -25,6 +27,10 @@ public class UIContainer : MonoBehaviour
     public void HideText()
     {
         textContainer.SetActive(false);
+    }
+    public void SetHealth(int health)
+    {
+        healthTextField.text = "Health: " + health;
     }
 
 }
