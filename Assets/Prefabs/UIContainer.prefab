@@ -268,7 +268,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   textContainer: {fileID: 455666697619662044}
   textField: {fileID: 455666696469081069}
-  healthTextField: {fileID: 0}
+  healthTextField: {fileID: 197700868}
 --- !u!1 &455666696257357655
 GameObject:
   m_ObjectHideFlags: 0
