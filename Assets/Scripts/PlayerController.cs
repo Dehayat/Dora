@@ -361,9 +361,15 @@ public class PlayerController : MonoBehaviour
         SetControl(false);
         anim.SetBool("Dead", true);
         rb.gravityScale = 2;
+        StartCoroutine(RestartGame());
         //rb.isKinematic = true;
         //rb.gravityScale = 0;
         //GetComponent<Collider2D>().enabled = false;
+    }
+    IEnumerator RestartGame()
+    {
+        yield return new WaitForSeconds(4);
+        SceneManager.LoadScene(0);
     }
 
 

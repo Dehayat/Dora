@@ -13,6 +13,7 @@ public class Hazard : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        if (collision.attachedRigidbody == null) return;
         if (collision.attachedRigidbody.CompareTag("Player"))
         {
             var player = collision.attachedRigidbody.GetComponent<PlayerController>();
