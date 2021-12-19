@@ -5,6 +5,7 @@ using UnityEngine;
 public class TextController : MonoBehaviour
 {
     [SerializeField]
+    [TextArea]
     private string text = "";
 
     public void ShowText()
