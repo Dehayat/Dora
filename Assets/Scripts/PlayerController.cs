@@ -42,6 +42,12 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private float teleportJarCooldownAfterTeleport = 0.2f;
 
+    [Header("Health")]
+    [SerializeField]
+    private int health = 3;
+    [SerializeField]
+    private float takeDamageCooldown = 0.3f;
+
 
     private float _moveInput;
     private float moveInput
@@ -92,28 +98,112 @@ public class PlayerController : MonoBehaviour
         aimDirection.Normalize();
     }
     private bool isAiming = false;
-    public void AimJarInput(CallbackContext callbackContext)
+    public async void AimJarInput(CallbackContext callbackContext)
     {
         if (!listenForInput)
         {
             return;
         }
-        if ((canThrow) && callbackContext.performed)
+        if (callbackContext.performed)
         {
-            isAiming = true;
-            anim.SetBool("Aiming", true);
+            if (canThrow && allowActions)
+            {
+                canThrow = false;
+                isAiming = true;
+                anim.SetBool("Aiming", true);
+                GameObject jar = Instantiate(throwJarPrefab, throwJarPoint.position, Quaternion.identity, transform);
+                while (isAiming)
+                {
+                    await Task.Yield();
+                    if (!allowActions)
+                    {
+                        isAiming = false;
+                        anim.SetBool("Aiming", false);
+                        DestroyImmediate(jar);
+                    }
+                    if (_wantToThrow)
+                    {
+                        if (Mathf.Abs(aimDirection.x) < throwJarDownDeadZone && aimDirection.y < 0)
+                        {
+                            isAiming = false;
+                            anim.SetBool("Aiming", false);
+                            DestroyImmediate(jar);
+                        }
+                        else
+                        {
+                            anim.SetTrigger("Throw");
+                            anim.SetBool("Aiming", false);
+                            isAiming = false;
+                            jar.GetComponent<Jar>().ActivateJar();
+                            jar.transform.SetParent(null);
+                            Rigidbody2D jarRb = jar.GetComponent<Rigidbody2D>();
+                            jarRb.AddForce(aimDirection * throwJarForce, ForceMode2D.Impulse);
+
+                            float nextThrow = Time.time + throwJarCooldown;
+                            canThrow = false;
+                            while (Time.time <= nextThrow)
+                            {
+                                await Task.Yield();
+                            }
+                        }
+                    }
+                }
+                canThrow = true;
+            }
         }
     }
-    public void AimJar2Input(CallbackContext callbackContext)
+    public async void AimJar2Input(CallbackContext callbackContext)
     {
         if (!listenForInput)
         {
             return;
         }
-        if ((canThrowTeleport) && callbackContext.performed)
+        if (callbackContext.performed)
         {
-            isAiming = true;
-            anim.SetBool("Aiming", true);
+            if (canThrowTeleport && teleportJar == null && allowActions)
+            {
+                canThrowTeleport = false;
+                isAiming = true;
+                anim.SetBool("Aiming", true);
+                GameObject jar = Instantiate(telportJarPrefab, throwJarPoint.position, Quaternion.identity, transform);
+                while (isAiming)
+                {
+                    if (!allowActions)
+                    {
+                        isAiming = false;
+                        anim.SetBool("Aiming", false);
+                        DestroyImmediate(jar);
+                    }
+                    await Task.Yield();
+                    if (_wantToThrowTeleport)
+                    {
+                        if (Mathf.Abs(aimDirection.x) < throwJarDownDeadZone && aimDirection.y < 0)
+                        {
+                            isAiming = false;
+                            anim.SetBool("Aiming", false);
+                            DestroyImmediate(jar);
+                        }
+                        else
+                        {
+                            anim.SetTrigger("Throw");
+                            anim.SetBool("Aiming", false);
+                            isAiming = false;
+                            jar.GetComponent<Jar>().ActivateJar();
+                            jar.transform.SetParent(null);
+                            Rigidbody2D jarRb = jar.GetComponent<Rigidbody2D>();
+                            jarRb.AddForce(aimDirection * throwJarForce, ForceMode2D.Impulse);
+                            teleportJar = jar;
+                            float nextThrow = Time.time + teleportJarCooldown;
+                            canThrowTeleport = false;
+                            while (Time.time <= nextThrow)
+                            {
+                                await Task.Yield();
+                            }
+                        }
+                    }
+                }
+                canThrowTeleport = true;
+            }
         }
     }
 
@@ -157,13 +247,32 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    public void ResetDirection()
-    {
-        FaceRight();
-    }
     public void SetControl(bool canControl)
     {
         listenForInput = canControl;
+    }
+
+    private bool allowActions = true;
+    public async void Damage(int damageAmount)
+    {
+        health -= damageAmount;
+        if (health < 0)
+        {
+            health = 0;
+        }
+        anim.SetTrigger("Damage");
+        allowActions = false;
+        float canMoveTimer = Time.time + takeDamageCooldown;
+        while (Time.time <= canMoveTimer)
+        {
+            await Task.Yield();
+        }
+        allowActions = true;
+
+        if (health == 0)
+        {
+            Die();
+        }
     }
 
     private Rigidbody2D rb;
@@ -192,7 +301,7 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         CheckGrounded();
-        if (isDead) { }
+        if (isDead || !allowActions) { }
         else
         {
             rb.gravityScale = 1;
@@ -211,72 +320,19 @@ public class PlayerController : MonoBehaviour
                     break;
             }
         }
-        TryThrow();
         TryTeleport();
-        TryThrowTeleport();
         ResetInput();
     }
 
+
     private bool canThrow = true;
-    private async void TryThrow()
-    {
-        if (_wantToThrow && canThrow)
-        {
-            if (Mathf.Abs(aimDirection.x) < throwJarDownDeadZone && aimDirection.y < 0)
-            {
-                return;
-            }
-
-            anim.SetTrigger("Throw");
-            anim.SetBool("Aiming", false);
-            isAiming = false;
-            GameObject jar = Instantiate(throwJarPrefab, throwJarPoint.position, Quaternion.identity);
-            Rigidbody2D jarRb = jar.GetComponent<Rigidbody2D>();
-            jarRb.AddForce(aimDirection * throwJarForce, ForceMode2D.Impulse);
-
-            float nextThrow = Time.time + throwJarCooldown;
-            canThrow = false;
-            while (Time.time <= nextThrow)
-            {
-                await Task.Yield();
-            }
-            canThrow = true;
-        }
-    }
     private bool canThrowTeleport = true;
-    private bool hasTeleportJar = true;
     private GameObject teleportJar = null;
-    private async void TryThrowTeleport()
-    {
-        if (_wantToThrowTeleport && canThrowTeleport && hasTeleportJar)
-        {
-            if (Mathf.Abs(aimDirection.x) < teleportJarDownDeadZone && aimDirection.y < 0)
-            {
-                return;
-            }
 
-            anim.SetTrigger("Throw");
-            anim.SetBool("Aiming", false);
-            isAiming = false;
-            teleportJar = Instantiate(telportJarPrefab, throwJarPoint.position, Quaternion.identity);
-            hasTeleportJar = false;
-            Rigidbody2D jarRb = teleportJar.GetComponent<Rigidbody2D>();
-            jarRb.AddForce(aimDirection * throwJarForce, ForceMode2D.Impulse);
-
-            float nextThrow = Time.time + teleportJarCooldown;
-            canThrowTeleport = false;
-            while (Time.time <= nextThrow)
-            {
-                canThrowTeleport = false;
-                await Task.Yield();
-            }
-        }
-    }
     private async void TryTeleport()
     {
-        if (_wantToTeleport && !hasTeleportJar)
+        if (_wantToTeleport && teleportJar != null)
         {
-            hasTeleportJar = true;
             transform.position = teleportJar.transform.position;
             rb.velocity = Vector2.zero;
             DestroyImmediate(teleportJar);
@@ -294,8 +350,7 @@ public class PlayerController : MonoBehaviour
     {
         isDead = true;
         SetControl(false);
-        anim.SetBool("Hit", false);
-        anim.SetTrigger("Die");
+        anim.SetBool("Dead", true);
         rb.gravityScale = 2;
         //rb.isKinematic = true;
         //rb.gravityScale = 0;
