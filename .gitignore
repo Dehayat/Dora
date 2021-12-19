@@ -58,3 +58,6 @@ sysinfo.txt
 # Crashlytics generated file
 crashlytics-build.properties
 
+/[Aa]ssets/Scenes/Level.unity
+/[Aa]ssets/Scenes/Level.unity.meta
+
