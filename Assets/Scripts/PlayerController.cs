@@ -255,6 +255,10 @@ public class PlayerController : MonoBehaviour
     private bool allowActions = true;
     public async void Damage(int damageAmount)
     {
+        if (health <= 0)
+        {
+            return;
+        }
         health -= damageAmount;
         if (health < 0)
         {

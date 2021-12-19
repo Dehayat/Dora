@@ -94,9 +94,10 @@ GameObject:
   - component: {fileID: -6619692568461855638}
   - component: {fileID: -4573548957010556537}
   - component: {fileID: -1826463853263154432}
+  - component: {fileID: 4378569842665900542}
   m_Layer: 7
   m_Name: Jar
-  m_TagString: Untagged
+  m_TagString: Jars
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -163,6 +164,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lifeTime: 5
+--- !u!114 &4378569842665900542
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5557334097047289392}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 12dad32bcb4f41642a9a48874940343c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &5557334097439955708
 GameObject:
   m_ObjectHideFlags: 0

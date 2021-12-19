@@ -95,7 +95,7 @@ GameObject:
   - component: {fileID: 9131686430548727409}
   m_Layer: 7
   m_Name: TeleportJar
-  m_TagString: Untagged
+  m_TagString: Jars
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

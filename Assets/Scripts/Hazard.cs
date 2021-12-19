@@ -22,5 +22,13 @@ public class Hazard : MonoBehaviour
                 Destroy(owner);
             }
         }
+        if (collision.attachedRigidbody.CompareTag("Jars"))
+        {
+            Destroy(collision.attachedRigidbody.gameObject);
+            if (destroyOnDamage)
+            {
+                Destroy(owner);
+            }
+        }
     }
 }
