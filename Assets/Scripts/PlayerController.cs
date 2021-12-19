@@ -204,6 +204,10 @@ public class PlayerController : MonoBehaviour
                 }
                 canThrowTeleport = true;
             }
+            else if (teleportJar != null)
+            {
+                Destroy(teleportJar);
+            }
         }
     }
 

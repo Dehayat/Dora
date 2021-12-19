@@ -25,10 +25,7 @@ public class Hazard : MonoBehaviour
         if (collision.attachedRigidbody.CompareTag("Jars"))
         {
             Destroy(collision.attachedRigidbody.gameObject);
-            if (destroyOnDamage)
-            {
-                Destroy(owner);
-            }
+            Destroy(owner);
         }
     }
 }

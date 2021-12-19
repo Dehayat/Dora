@@ -12,7 +12,7 @@ public class DamageJar : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.collider.attachedRigidbody.GetComponent<Column>() != null)
+        if (collision.collider.attachedRigidbody != null && collision.collider.attachedRigidbody.GetComponent<Column>() != null)
         {
             collision.collider.attachedRigidbody.GetComponent<Column>().Damage(damageColumn);
 

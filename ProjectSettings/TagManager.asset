@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - Jars
+  - Monster
   layers:
   - Default
   - TransparentFX
@@ -16,7 +17,7 @@ TagManager:
   - Jars
   - Player
   - Hazard
-  - 
+  - Enemy
   - 
   - 
   - 
